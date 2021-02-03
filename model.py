@@ -41,7 +41,7 @@ class City_Model(Model):
             self.grid.place_agent(agent, (x,y))
             
         self.datacollector = DataCollector(model_reporters = {"City_sizes": city_sizes,"Ranks": city_ranks,
-                                                             "Skill_dist": skill_levels,
+                                                             "Skill_dist": skill_levels,"Utility": model_utility,
                                                               "Rsquare": model_rsquare,"Beta": model_beta,
                                                               "Mean_entropy": mean_entropy}) 
 
