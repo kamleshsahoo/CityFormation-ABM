@@ -13,7 +13,12 @@ In the EvolutionaryCity.ipynb we show some basic statistics of the model for mos
     6. Entropy distribution of cities at the end of each run.
  
 ##### SensitivityAnalysis.ipynb
+Here you can find the OFAT and SOBOL analysis. These analysis were done for the following parameters:
 
+    1. Negative Coefficient
+    2. Number of Groups
+    3. Number of Agents
+    4. Radius Coefficient
     
 
 ### Model Description 
