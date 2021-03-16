@@ -39,6 +39,10 @@ class City_Model(Model):
             x = self.random.randrange(self.grid.width)
             y = self.random.randrange(self.grid.height)
             self.grid.place_agent(agent, (x,y))
+            agent.neighbor_cell_pos = self.grid.get_neighborhood((x,y), moore=True, include_center=False, radius=agent.vision)
+            
+        self.attributes = {}
+        self.calc_attributes()
             
         self.datacollector = DataCollector(model_reporters = {"City_sizes": city_sizes,"Ranks": city_ranks,
                                                              "Skill_dist": skill_levels,"Utility": model_utility,
@@ -49,7 +53,23 @@ class City_Model(Model):
         """Advance the model by one step"""
         self.datacollector.collect(self) 
         self.schedule.step()
+        self.calc_attributes()
+    
+    '''Pre-calculate the attributes of the cities'''
+    def calc_attributes(self):
+        for i in range(self.height):
+            for j in range(self.width):
+                tot_agents = self.grid.get_cell_list_contents((i,j))
+                n = len(tot_agents)
+                agent_type_list = [agent.type for agent in tot_agents]
 
+                # check utility for current cell or neighbouring cell
+                    # +1 term if the agent considers neighbouring cell
+                
+                E = self.shanon_E(agent_type_list)  
+                # utility stays the same if agent stays put in current cell
+                self.attributes[(i,j)] = (E,n)
+    
     '''Function to calculate Entropies'''
     def shanon_E(self, type_list):
         occurences = collections.Counter(type_list)

@@ -10,7 +10,7 @@ class Habitant(Agent):
     def __init__(self, unique_id, model, agent_ability):
         super().__init__(unique_id, model)
         self.r = agent_ability
-        self.vision = math.ceil(np.random.beta(self.r,(1-self.r)) * self.model.radius)    # fixed grid size of 20 
+        self.vision = math.ceil(np.random.beta(self.r,(1-self.r)) * self.model.radius)    # fixed grid size of 20
         self.type = None
 
         for i in range(len(self.model.skill_levels)):
@@ -19,47 +19,29 @@ class Habitant(Agent):
            
         self.steps = 0
         self.no_moves = 0
+        self.neighbor_cell_pos = None
        
     def utility(self, coord):
-                
-        tot_agents = self.model.grid.get_cell_list_contents(coord)
-        n = len(tot_agents)
-        agent_type_list = [agent.type for agent in tot_agents]
-                
-        # check utility for current cell or neighbouring cell        
-        if coord != self.pos:
-            # +1 term if the agent considers neighbouring cell
-            agent_type_list.append(self.type)
-            return (self.model.shanon_E(agent_type_list) * self.r * (n + 1))  - (self.model.c * (n + 1)**2)  
-        else:
-            # utility stays the same if agent stays put in current cell
-
-            return (self.model.shanon_E(agent_type_list) * self.r * n) - (self.model.c * n**2)    
-        
+          return (self.model.attributes[(coord)][0] * self.r * (self.model.attributes[(coord)][1]))  - (self.model.c * (self.model.attributes[(coord)][1])**2)        
     
     def move(self):
-        
-        neighbor_cell_pos = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=False, radius=self.vision)
         cell_dict = {}     # define a cell dictionary = {keys = (coordinates): values = utility}
         max_pos = None
         
-        for n in neighbor_cell_pos:     
-            cell_dict[n] = self.utility(n)
+        MaxValue = 0
+        
+        for n in self.neighbor_cell_pos:     
+            U = self.utility(n)
             
-            MaxValue = max(cell_dict.items(), key=lambda x: x[1])    
-            # get the coordinates of maximum utility 
-            listcoords = []
-            # Iterate over all the items in dictionary to find keys with max value
-            for coord, util in cell_dict.items():
-                if util == MaxValue[1]:
-                    listcoords.append(coord)
-                    
-            max_pos = random.choice(listcoords)  # make a random choice if multiple cells have same utility
-            # move only when moving gives a utility benefit
-            if self.utility(max_pos) > self.utility(self.pos):
-                self.model.grid.move_agent(self, max_pos)
+            if U >= MaxValue:
+                max_pos = n
+                MaxValue = U
+            
+        # move only when moving gives a utility benefit
+        if MaxValue > self.utility(self.pos) and not max_pos == None:
+             self.model.grid.move_agent(self, max_pos)
                 
-            else: self.no_moves += 1
+        else: self.no_moves += 1
                           
     def step(self):
         # for RandomActivation
